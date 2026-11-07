@@ -1,5 +1,3 @@
-# customer-churn-predictor
-
 # Customer Churn Predictor Live app: 
 https://your-app.streamlit.app
 
