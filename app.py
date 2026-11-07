@@ -1,48 +1,120 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the trained model
-model = joblib.load("churn_model.pkl")
-
-# Page settings
+# -----------------------------
+# Page configuration
+# -----------------------------
 st.set_page_config(
     page_title="Customer Churn Predictor",
     page_icon="📊",
     layout="wide"
 )
 
+# -----------------------------
+# Load trained model
+# -----------------------------
+model = joblib.load("churn_model.pkl")
+
+# -----------------------------
+# App title
+# -----------------------------
 st.title("📊 Customer Churn Predictor")
-st.write("Enter customer information to predict churn risk.")
 
+st.write(
+    "Use customer information to estimate the likelihood of churn "
+    "and identify customers who may need retention attention."
+)
+
+st.divider()
+
+# -----------------------------
 # Customer information
-st.header("Customer Information")
+# -----------------------------
+st.subheader("Customer Information")
 
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
-    gender = st.selectbox("Gender", ["Male", "Female"])
-    senior_citizen = st.selectbox("Senior Citizen", [0, 1])
-    partner = st.selectbox("Partner", ["Yes", "No"])
-    dependents = st.selectbox("Dependents", ["Yes", "No"])
-
-with col2:
-    tenure = st.number_input(
-        "Tenure (months)", min_value=0, max_value=72, value=12
+    gender = st.selectbox(
+        "Gender",
+        ["Male", "Female"]
     )
 
-    phone_service = st.selectbox("Phone Service", ["Yes", "No"])
+    senior_citizen = st.selectbox(
+        "Senior Citizen",
+        [0, 1]
+    )
+
+    partner = st.selectbox(
+        "Partner",
+        ["Yes", "No"]
+    )
+
+    dependents = st.selectbox(
+        "Dependents",
+        ["Yes", "No"]
+    )
+
+    tenure = st.number_input(
+        "Tenure (months)",
+        min_value=0,
+        max_value=100,
+        value=12
+    )
+
+    phone_service = st.selectbox(
+        "Phone Service",
+        ["Yes", "No"]
+    )
 
     multiple_lines = st.selectbox(
         "Multiple Lines",
         ["Yes", "No", "No phone service"]
     )
 
+with col2:
     internet_service = st.selectbox(
         "Internet Service",
         ["DSL", "Fiber optic", "No"]
     )
+
+    online_security = st.selectbox(
+        "Online Security",
+        ["Yes", "No", "No internet service"]
+    )
+
+    online_backup = st.selectbox(
+        "Online Backup",
+        ["Yes", "No", "No internet service"]
+    )
+
+    device_protection = st.selectbox(
+        "Device Protection",
+        ["Yes", "No", "No internet service"]
+    )
+
+    tech_support = st.selectbox(
+        "Tech Support",
+        ["Yes", "No", "No internet service"]
+    )
+
+    streaming_tv = st.selectbox(
+        "Streaming TV",
+        ["Yes", "No", "No internet service"]
+    )
+
+    streaming_movies = st.selectbox(
+        "Streaming Movies",
+        ["Yes", "No", "No internet service"]
+    )
+
+# -----------------------------
+# Billing information
+# -----------------------------
+st.subheader("Billing Information")
+
+col3, col4 = st.columns(2)
 
 with col3:
     contract = st.selectbox(
@@ -50,6 +122,12 @@ with col3:
         ["Month-to-month", "One year", "Two year"]
     )
 
+    paperless_billing = st.selectbox(
+        "Paperless Billing",
+        ["Yes", "No"]
+    )
+
+with col4:
     payment_method = st.selectbox(
         "Payment Method",
         [
@@ -61,54 +139,23 @@ with col3:
     )
 
     monthly_charges = st.number_input(
-        "Monthly Charges", min_value=0.0, value=70.0
+        "Monthly Charges",
+        min_value=0.0,
+        value=70.0
     )
 
     total_charges = st.number_input(
-        "Total Charges", min_value=0.0, value=840.0
+        "Total Charges",
+        min_value=0.0,
+        value=500.0
     )
 
-# Additional services
-st.header("Additional Services")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    online_security = st.selectbox(
-        "Online Security",
-        ["Yes", "No", "No internet service"]
-    )
-
-    online_backup = st.selectbox(
-        "Online Backup",
-        ["Yes", "No", "No internet service"]
-    )
-
-with col2:
-    device_protection = st.selectbox(
-        "Device Protection",
-        ["Yes", "No", "No internet service"]
-    )
-
-    tech_support = st.selectbox(
-        "Tech Support",
-        ["Yes", "No", "No internet service"]
-    )
-
-with col3:
-    streaming_tv = st.selectbox(
-        "Streaming TV",
-        ["Yes", "No", "No internet service"]
-    )
-
-    streaming_movies = st.selectbox(
-        "Streaming Movies",
-        ["Yes", "No", "No internet service"]
-    )
-
+# -----------------------------
 # Prediction
-if st.button("🔍 Predict Churn Risk", type="primary"):
+# -----------------------------
+if st.button("🔍 Predict Churn", use_container_width=True):
 
+    # Create a dataframe containing the customer's information
     customer = pd.DataFrame({
         "gender": [gender],
         "SeniorCitizen": [senior_citizen],
@@ -125,39 +172,41 @@ if st.button("🔍 Predict Churn Risk", type="primary"):
         "StreamingTV": [streaming_tv],
         "StreamingMovies": [streaming_movies],
         "Contract": [contract],
+        "PaperlessBilling": [paperless_billing],
         "PaymentMethod": [payment_method],
         "MonthlyCharges": [monthly_charges],
         "TotalCharges": [total_charges]
     })
 
-    # Calculate probability of churn
+    # Make prediction
+    prediction = model.predict(customer)[0]
+
+    # Get churn probability
     probability = model.predict_proba(customer)[0][1]
-
-    churn_percentage = probability * 100
-
-    # Determine risk level
-    if churn_percentage >= 60:
-        risk = "High"
-        recommendation = "Prioritize this customer for immediate retention outreach."
-
-    elif churn_percentage >= 30:
-        risk = "Medium"
-        recommendation = "Monitor this customer and consider a retention offer."
-
-    else:
-        risk = "Low"
-        recommendation = "Customer currently shows a relatively low churn risk."
 
     st.divider()
 
-    st.subheader("Prediction Result")
+    if prediction == "Yes":
+        st.error("⚠️ High Churn Risk")
+        st.metric(
+            "Churn Probability",
+            f"{probability * 100:.1f}%"
+        )
 
-    st.metric(
-        "Churn Probability",
-        f"{churn_percentage:.1f}%"
-    )
+        st.subheader("Recommended Retention Actions")
 
-    st.info(f"**Risk Level: {risk}**")
+        st.write("• Consider offering a contract upgrade incentive.")
+        st.write("• Review the customer's monthly charges.")
+        st.write("• Contact the customer proactively.")
 
-    st.write("### Recommended Action")
-    st.write(recommendation)
+    else:
+        st.success("✅ Low Churn Risk")
+        st.metric(
+            "Churn Probability",
+            f"{probability * 100:.1f}%"
+        )
+
+        st.write(
+            "This customer is currently predicted to have a lower "
+            "likelihood of churning."
+        )
