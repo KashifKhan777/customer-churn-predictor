@@ -1,5 +1,5 @@
 # Customer Churn Predictor Live app: 
-https://your-app.streamlit.app
+https://customer-churn-predictor-kashif.streamlit.app/
 
 Predicts which telecom customers are likely to leave, and suggests actions to keep them.
 
